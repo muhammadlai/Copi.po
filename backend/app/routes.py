@@ -1,10 +1,11 @@
 import json
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select, desc
 from sqlalchemy.orm import Session
 from .db import get_db
-from .models import Base, Person, Message, Event
+from .models import Person, Message, Event
 from .ai import generate_reply
 from .config import settings
 from .whatsapp import send_whatsapp_text
@@ -18,19 +19,29 @@ class ReplyRequest(BaseModel):
     message: str = Field(min_length=1)
     mode: str = "friendly"
 
-@router.post("/ai/reply")
-def ai_reply(body: ReplyRequest, db: Session = Depends(get_db)):
+async def save_and_suggest(body: ReplyRequest, db: Session):
     person = db.scalar(select(Person).where(Person.platform == body.platform, Person.external_id == body.external_id))
     if not person:
         person = Person(platform=body.platform, external_id=body.external_id, display_name=body.display_name)
-        db.add(person); db.flush()
+        db.add(person)
+        db.flush()
     context = f"name={person.display_name}; notes={person.notes}; interests={person.interests}"
     db.add(Message(person_id=person.id, platform=body.platform, direction="inbound", text=body.message))
-    reply = generate_reply(body.message, body.mode, context)
+    reply = await generate_reply(body.message, body.mode, context)
     db.add(Message(person_id=person.id, platform=body.platform, direction="suggestion", text=reply))
-    person.last_seen_at = __import__("datetime").datetime.now(__import__("datetime").timezone.utc)
+    person.last_seen_at = datetime.now(timezone.utc)
     db.commit()
+    return reply, person
+
+@router.post("/ai/reply")
+async def ai_reply(body: ReplyRequest, db: Session = Depends(get_db)):
+    reply, person = await save_and_suggest(body, db)
     return {"reply": reply, "person_id": person.id, "mode": body.mode}
+
+@router.post("/tiktok/suggest")
+async def tiktok_suggest(body: ReplyRequest, db: Session = Depends(get_db)):
+    body.platform = "tiktok"
+    return await ai_reply(body, db)
 
 @router.get("/people")
 def people(db: Session = Depends(get_db)):
@@ -43,12 +54,8 @@ def person_messages(person_id: int, db: Session = Depends(get_db)):
     return [{"id": x.id, "direction": x.direction, "platform": x.platform, "text": x.text, "created_at": x.created_at} for x in rows]
 
 @router.get("/whatsapp/webhook")
-def whatsapp_verify(
-    hub_mode: str = Query("", alias="hub.mode"),
-    hub_challenge: str = Query("", alias="hub.challenge"),
-    hub_verify_token: str = Query("", alias="hub.verify_token"),
-):
-    if hub_mode == "subscribe" and hub_verify_token == settings.whatsapp_verify_token:
+def whatsapp_verify(hub_mode: str = Query("", alias="hub.mode"), hub_challenge: str = Query("", alias="hub.challenge"), hub_verify_token: str = Query("", alias="hub.verify_token")):
+    if hub_mode == "subscribe" and hub_verify_token == settings.wa_verify_token:
         return int(hub_challenge)
     raise HTTPException(status_code=403, detail="Webhook verification failed")
 
@@ -57,7 +64,26 @@ async def whatsapp_webhook(request: Request, db: Session = Depends(get_db)):
     payload = await request.json()
     db.add(Event(platform="whatsapp", event_type="webhook", payload=json.dumps(payload)))
     db.commit()
-    return {"ok": True}
+
+    handled = 0
+    for entry in payload.get("entry", []):
+        for change in entry.get("changes", []):
+            value = change.get("value", {})
+            for item in value.get("messages", []):
+                if item.get("type") != "text":
+                    continue
+                sender = item.get("from", "")
+                text_in = item.get("text", {}).get("body", "")
+                if not sender or not text_in:
+                    continue
+                body = ReplyRequest(platform="whatsapp", external_id=sender, display_name=sender, message=text_in, mode=settings.wa_reply_mode)
+                reply, person = await save_and_suggest(body, db)
+                if settings.wa_auto_reply:
+                    await send_whatsapp_text(sender, reply)
+                    db.add(Message(person_id=person.id, platform="whatsapp", direction="outbound", text=reply, approved=True))
+                    db.commit()
+                handled += 1
+    return {"ok": True, "handled_messages": handled, "auto_reply": settings.wa_auto_reply}
 
 @router.post("/whatsapp/send")
 async def whatsapp_send(to: str, text: str):
