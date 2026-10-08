@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     wa_phone_number_id: str = Field(default="", validation_alias="WHATSAPP_" + "PHONE_NUMBER_ID")
     wa_verify_token: str = Field(default="", validation_alias="WHATSAPP_" + "VERIFY_TOKEN")
     wa_graph_version: str = "v23.0"
+    wa_auto_reply: bool = False
+    wa_reply_mode: str = "friendly"
     tiktok_client_key: str = ""
     tiktok_client_secret: str = ""
     tiktok_redirect_uri: str = ""
