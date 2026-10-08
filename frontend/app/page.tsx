@@ -1,0 +1,1 @@
+export default function Home() { return (<main style={{fontFamily:"system-ui",padding:40}}><h1>Copi.po — Aitzaz AI Social Copilot</h1><p>TikTok LIVE Copilot + WhatsApp AI Agent</p><p>Foundation scaffold is ready.</p></main>); }
