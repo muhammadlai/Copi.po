@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 const modes = ["friendly", "funny", "smart", "short", "warm"];
 
 export default function Home() {
@@ -58,6 +58,11 @@ export default function Home() {
 
   async function askAI() {
     if (!message.trim() || busy) return;
+    if (!API) {
+      setStatus("AI backend not deployed");
+      setReply("The browser avatar and voice are ready. The AI brain needs a secure backend URL before it can generate live replies. Configure NEXT_PUBLIC_API_URL to your deployed Copi.po API; never place your OpenAI key in this page.");
+      return;
+    }
     setBusy(true);
     setStatus("AI is thinking…");
     try {
