@@ -1,0 +1,53 @@
+name: Deploy Chromebook AI Host Preview
+
+on:
+  push:
+    branches:
+      - chromebook-ai-host
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+      - name: Build static browser preview
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+        run: npm run build
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/out
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
