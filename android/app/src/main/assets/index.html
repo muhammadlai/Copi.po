@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Copi.po AI Avatar</title>
+<style>
+:root{color-scheme:dark;--pink:#ff4f91;--violet:#9b8cff;--bg:#090b16}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 20%,#272044 0,#101323 46%,#080a12 100%);color:#fff;font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
+main{max-width:520px;margin:auto;padding:20px 18px 30px}.top{display:flex;align-items:center;justify-content:space-between}.brand{font-weight:800;letter-spacing:.08em}.pill{font-size:11px;padding:6px 9px;border:1px solid #4a4668;border-radius:99px;color:#d9d3ff}
+h1{font-size:26px;margin:24px 0 5px}.sub{color:#aaaec8;font-size:13px;line-height:1.5}
+.stage{position:relative;height:370px;margin:18px 0;border:1px solid #393452;border-radius:26px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#453563,#191b31 54%,#0c1020);display:flex;align-items:center;justify-content:center}
+.glow{position:absolute;width:245px;height:245px;border-radius:50%;background:#b58aff30;filter:blur(22px)}
+.avatar{position:relative;width:205px;height:300px;animation:float 4s ease-in-out infinite;transform-origin:50% 90%}
+.hairback{position:absolute;top:38px;left:25px;width:155px;height:190px;background:linear-gradient(90deg,#211529,#5b354a 48%,#201526);border-radius:48% 48% 40% 40%;box-shadow:0 0 24px #f3a2d333}
+.neck{position:absolute;top:172px;left:82px;width:42px;height:52px;background:linear-gradient(90deg,#b96f67,#f1b7a0,#c47d72);border-radius:12px}
+.body{position:absolute;bottom:0;left:27px;width:151px;height:115px;background:linear-gradient(110deg,#252b58,#7762a7,#292a54);border-radius:58% 58% 14% 14%;border-top:4px solid #f0c0b8}
+.face{position:absolute;top:50px;left:42px;width:122px;height:151px;background:linear-gradient(100deg,#bd7d70,#f4c4ae 45%,#d99887);border-radius:46% 46% 44% 44%;box-shadow:inset -8px -4px 15px #9a555533}
+.fringe{position:absolute;top:34px;left:34px;width:137px;height:80px;background:linear-gradient(100deg,#24172a,#6d4359,#28172a);border-radius:60% 45% 35% 30%;clip-path:polygon(0 0,100% 0,96% 65%,78% 43%,69% 100%,54% 53%,35% 95%,28% 49%,8% 72%)}
+.eye{position:absolute;top:72px;width:25px;height:10px;border-bottom:3px solid #402b38;border-radius:50%}.eye.left{left:22px}.eye.right{right:22px}
+.pupil{position:absolute;top:4px;left:8px;width:7px;height:7px;border-radius:50%;background:#342335}
+.nose{position:absolute;top:89px;left:58px;width:8px;height:17px;border-right:2px solid #b8756d;border-radius:50%}
+.cheek{position:absolute;top:99px;width:20px;height:9px;background:#ed888b66;filter:blur(4px);border-radius:50%}.cheek.l{left:10px}.cheek.r{right:10px}
+.mouth{position:absolute;top:119px;left:48px;width:27px;height:7px;background:#9e435e;border-radius:4px 4px 12px 12px;transition:height .08s}
+.talking .mouth{animation:talk .18s infinite alternate}.talking .avatar{animation:float 1.5s ease-in-out infinite}
+@keyframes talk{to{height:15px;width:30px;left:46px}}@keyframes float{50%{transform:translateY(-6px)}}
+.caption{position:absolute;bottom:12px;left:12px;right:12px;text-align:center;color:#dcd5f4;font-size:12px}
+.card{background:#15182a;border:1px solid #292d47;border-radius:18px;padding:15px;margin-top:12px}
+.label{font-size:12px;color:#aeb1ce;margin-bottom:8px}.reply{font-size:14px;line-height:1.5;min-height:42px;color:#f3f2ff}
+.row{display:flex;gap:9px;margin-top:12px}button{border:0;border-radius:12px;padding:13px 12px;font-weight:700;color:white;background:linear-gradient(100deg,#8d63ff,#ed4d9b);flex:1;font-size:13px}button.secondary{background:#272a41;border:1px solid #3b3e59}
+.note{font-size:11px;line-height:1.5;color:#8e93b1;margin-top:15px}
+</style>
+</head>
+<body><main>
+<div class="top"><div class="brand">COPI.PO <span style="color:#a99aff">AI</span></div><div class="pill">MOBILE PROTOTYPE</div></div>
+<h1>Meet your AI host</h1><div class="sub">A first-stage avatar and voice test for your phone. This demo is not yet connected to TikTok LIVE.</div>
+<section class="stage" id="stage"><div class="glow"></div><div class="avatar">
+<div class="hairback"></div><div class="neck"></div><div class="body"></div>
+<div class="face"><div class="eye left"><div class="pupil"></div></div><div class="eye right"><div class="pupil"></div></div><div class="nose"></div><div class="cheek l"></div><div class="cheek r"></div><div class="mouth"></div></div><div class="fringe"></div>
+</div><div class="caption">Original fictional AI character · Demo</div></section>
+<section class="card"><div class="label">AI HOST RESPONSE</div><div class="reply" id="reply">Hi! I'm your AI host. Tap “Hear voice” to test my American English voice.</div>
+<div class="row"><button id="speak">Hear voice</button><button class="secondary" id="listen">Speak to avatar</button></div></section>
+<div class="note">Phase 1 prototype: animated character, Android speech input and phone text-to-speech. A realistic 3D model, AI backend, secure server keys, and TikTok-approved streaming integration are separate next steps. Do not enter API keys in this app.</div>
+</main>
+<script>
+const stage=document.getElementById('stage'),reply=document.getElementById('reply');
+function say(text){reply.textContent=text;stage.classList.add('talking');try{NativeAvatar.speak(text)}catch(e){if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=.96;speechSynthesis.speak(u)}}setTimeout(()=>stage.classList.remove('talking'),Math.max(1200,text.length*55))}
+document.getElementById('speak').onclick=()=>say(reply.textContent);
+document.getElementById('listen').onclick=()=>{try{NativeAvatar.listen()}catch(e){reply.textContent='Voice input requires the Android app build.'}};
+window.onNativeTranscript=function(text){const t=String(text||'').trim();if(!t)return;const lower=t.toLowerCase();let answer;if(/hello|hi|hey/.test(lower))answer="Hey! I'm happy you're here. How's your day going?";else if(/your name|who are you/.test(lower))answer="I'm Copi, an AI virtual host. I'm here to chat and make the LIVE more fun.";else if(/how are you/.test(lower))answer="I'm doing great, thanks for asking! What are you up to today?";else answer="That's a great question. I'm an AI host prototype, so I don't know everything yet, but I'm listening. Tell me a little more.";say(answer)};
+</script></body></html>
